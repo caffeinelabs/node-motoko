@@ -216,7 +216,3 @@ file.parseCandid()
 // Parse the file (with types) as a Motoko program
 file.parseMotokoTyped()
 ```
-
-## Contributing
-
-PRs are welcome! Please check out the [contributor guidelines](https://github.com/dfinity/node-motoko/blob/main/.github/CONTRIBUTING.md) for more information.
