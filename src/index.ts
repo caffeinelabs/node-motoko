@@ -1,4 +1,4 @@
-import { CompilerNode, Node, simplifyAST } from './ast';
+import { CompilerNode, Node, RawExp, simplifyAST } from './ast';
 import { Scope, file } from './file';
 import {
     Package,
@@ -13,6 +13,9 @@ import { resolveLib, resolveMain } from './utils/resolveEntryPoint';
 export type Motoko = ReturnType<typeof wrapMotoko>;
 
 type Compiler = any; // TODO: generate from `js_of_ocaml`?
+
+export type RawScope = unknown;
+export type RawProg = unknown;
 
 export type Diagnostic = {
     source: string;
@@ -63,8 +66,8 @@ export default function wrapMotoko(compiler: Compiler) {
             throw new Error(
                 result.diagnostics
                     ? result.diagnostics
-                          .map(({ message }: Diagnostic) => message)
-                          .join('; ')
+                        .map(({ message }: Diagnostic) => message)
+                        .join('; ')
                     : '(no diagnostics)',
             );
         }
@@ -98,6 +101,8 @@ export default function wrapMotoko(compiler: Compiler) {
         ast: Node;
         type: Node;
         immediateImports: string[];
+        prog: RawProg;
+        sscope: RawScope;
     };
     function parseMotokoTypedWithScopeCache(
         paths: string,
@@ -114,12 +119,12 @@ export default function wrapMotoko(compiler: Compiler) {
         scopeCache: Map<string, Scope>,
         enableRecovery?: boolean,
     ): [
-        (
-            | ParseMotokoTypedWithScopeCacheResult
-            | ParseMotokoTypedWithScopeCacheResult[]
-        ),
-        Map<string, Scope>,
-    ] {
+            (
+                | ParseMotokoTypedWithScopeCacheResult
+                | ParseMotokoTypedWithScopeCacheResult[]
+            ),
+            Map<string, Scope>,
+        ] {
         if (enableRecovery === undefined) {
             enableRecovery = false;
         }
@@ -142,15 +147,21 @@ export default function wrapMotoko(compiler: Compiler) {
                     ast,
                     typ,
                     immediateImports,
+                    prog,
+                    sscope,
                 }: {
                     ast: CompilerNode;
                     typ: CompilerNode;
                     immediateImports: string[];
+                    prog: RawProg;
+                    sscope: RawScope;
                 }) => {
                     return {
                         ast: simplifyAST(ast),
                         type: simplifyAST(typ),
                         immediateImports,
+                        prog,
+                        sscope,
                     };
                 },
             ),
@@ -278,6 +289,15 @@ export default function wrapMotoko(compiler: Compiler) {
         },
         parseMotokoTyped,
         parseMotokoTypedWithScopeCache,
+        resolveDotCandidates(
+            sscope: RawScope,
+            rawExp: RawExp,
+        ): {
+            name: string;
+            type: string;
+        }[] {
+            return invoke('resolveDotCandidates', false, [sscope, rawExp]);
+        },
         resolveMain(directory: string = ''): string | undefined {
             return resolveMain(mo, directory);
         },

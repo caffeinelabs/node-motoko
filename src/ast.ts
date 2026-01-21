@@ -1,9 +1,12 @@
 export type CompilerAST = CompilerAST[] | CompilerNode | string | null;
 export type CompilerSpan = { name: 'Pos'; args: [string, string, string] };
 
+export type RawExp = unknown;
+
 export interface CompilerNode {
     name: string;
     args: CompilerAST[];
+    rawExp?: RawExp;
 }
 
 export type Span = [number, number];
@@ -23,6 +26,7 @@ export interface Node extends Partial<Source> {
     doc?: string;
     declaration?: Source;
     args?: AST[];
+    rawExp?: RawExp;
 }
 
 export function asNode(ast: AST | undefined): Node | undefined {
@@ -102,6 +106,7 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
     }
     const node: Node = {
         name: ast.name,
+        rawExp: ast.rawExp,
     };
     Object.defineProperty(node, 'parent', {
         value: parent,
