@@ -14,8 +14,11 @@ export type Motoko = ReturnType<typeof wrapMotoko>;
 
 type Compiler = any; // TODO: generate from `js_of_ocaml`?
 
-export type RawScope = unknown;
-export type RawProg = unknown;
+/** Opaque scope object from the Motoko compiler - do not construct manually */
+export type RawScope = unknown & { readonly __brand: 'RawScope' };
+
+/** Opaque program object from the Motoko compiler - do not construct manually */
+export type RawProg = unknown & { readonly __brand: 'RawProg' };
 
 export type Diagnostic = {
     source: string;

@@ -1,7 +1,8 @@
 export type CompilerAST = CompilerAST[] | CompilerNode | string | null;
 export type CompilerSpan = { name: 'Pos'; args: [string, string, string] };
 
-export type RawExp = unknown;
+/** Opaque expression object from the Motoko compiler - do not construct manually */
+export type RawExp = unknown & { readonly __brand: 'RawExp' };
 
 export interface CompilerNode {
     name: string;
