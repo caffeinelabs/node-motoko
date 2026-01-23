@@ -4,6 +4,8 @@ export type CompilerSpan = { name: 'Pos'; args: [string, string, string] };
 /** Opaque expression object from the Motoko compiler - do not construct manually */
 export type RawExp = unknown & { readonly __brand: 'RawExp' };
 
+const rawExpSymbol = Symbol('rawExp');
+
 export interface CompilerNode {
     name: string;
     args: CompilerAST[];
@@ -27,7 +29,19 @@ export interface Node extends Partial<Source> {
     doc?: string;
     declaration?: Source;
     args?: AST[];
-    rawExp?: RawExp;
+}
+
+/**
+ * Safely retrieves the raw expression from a node.
+ * 
+ * The raw expression is stored internally using a Symbol to prevent accidental access,
+ * which can break property descriptors on child nodes (e.g., when logging).
+ * 
+ * @param node The node to get the raw expression from
+ * @returns The raw expression, or undefined if not available
+ */
+export function getRawExp(node: Node): RawExp | undefined {
+    return (node as any)[rawExpSymbol];
 }
 
 export function asNode(ast: AST | undefined): Node | undefined {
@@ -107,8 +121,9 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
     }
     const node: Node = {
         name: ast.name,
-        rawExp: ast.rawExp,
     };
+    // Store rawExp using a Symbol to prevent accidental access, e.g. in logs which destroys the type annotations in the AST...
+    (node as any)[rawExpSymbol] = ast.rawExp;
     Object.defineProperty(node, 'parent', {
         value: parent,
         enumerable: false,

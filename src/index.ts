@@ -17,9 +17,6 @@ type Compiler = any; // TODO: generate from `js_of_ocaml`?
 /** Opaque scope object from the Motoko compiler - do not construct manually */
 export type RawScope = unknown & { readonly __brand: 'RawScope' };
 
-/** Opaque program object from the Motoko compiler - do not construct manually */
-export type RawProg = unknown & { readonly __brand: 'RawProg' };
-
 export type Diagnostic = {
     source: string;
     range: {
@@ -104,7 +101,6 @@ export default function wrapMotoko(compiler: Compiler) {
         ast: Node;
         type: Node;
         immediateImports: string[];
-        prog: RawProg;
         sscope: RawScope;
     };
     function parseMotokoTypedWithScopeCache(
@@ -150,20 +146,17 @@ export default function wrapMotoko(compiler: Compiler) {
                     ast,
                     typ,
                     immediateImports,
-                    prog,
                     sscope,
                 }: {
                     ast: CompilerNode;
                     typ: CompilerNode;
                     immediateImports: string[];
-                    prog: RawProg;
                     sscope: RawScope;
                 }) => {
                     return {
                         ast: simplifyAST(ast),
                         type: simplifyAST(typ),
                         immediateImports,
-                        prog,
                         sscope,
                     };
                 },
@@ -299,6 +292,7 @@ export default function wrapMotoko(compiler: Compiler) {
             name: string;
             type: string;
         }[] {
+            // TODO: consider not exposing the RawScope nor RawExp outside of this library...
             return invoke('resolveDotCandidates', false, [sscope, rawExp]);
         },
         resolveMain(directory: string = ''): string | undefined {
