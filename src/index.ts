@@ -101,7 +101,7 @@ export default function wrapMotoko(compiler: Compiler) {
         ast: Node;
         type: Node;
         immediateImports: string[];
-        sscope: RawScope;
+        scope: RawScope;
     };
     function parseMotokoTypedWithScopeCache(
         paths: string,
@@ -146,18 +146,18 @@ export default function wrapMotoko(compiler: Compiler) {
                     ast,
                     typ,
                     immediateImports,
-                    sscope,
+                    scope,
                 }: {
                     ast: CompilerNode;
                     typ: CompilerNode;
                     immediateImports: string[];
-                    sscope: RawScope;
+                    scope: RawScope;
                 }) => {
                     return {
                         ast: simplifyAST(ast),
                         type: simplifyAST(typ),
                         immediateImports,
-                        sscope,
+                        scope,
                     };
                 },
             ),
@@ -286,14 +286,14 @@ export default function wrapMotoko(compiler: Compiler) {
         parseMotokoTyped,
         parseMotokoTypedWithScopeCache,
         resolveDotCandidates(
-            sscope: RawScope,
+            scope: RawScope,
             rawExp: RawExp,
         ): {
             name: string;
             type: string;
         }[] {
             // TODO: consider not exposing the RawScope nor RawExp outside of this library...
-            return invoke('resolveDotCandidates', false, [sscope, rawExp]);
+            return invoke('resolveDotCandidates', false, [scope, rawExp]);
         },
         resolveMain(directory: string = ''): string | undefined {
             return resolveMain(mo, directory);
