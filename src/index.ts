@@ -291,6 +291,7 @@ export default function wrapMotoko(compiler: Compiler) {
         ): {
             name: string;
             type: string;
+            moduleName?: string;
         }[] {
             // TODO: consider not exposing the RawScope nor RawExp outside of this library...
             return invoke('resolveDotCandidates', false, [scope, rawExp]);
