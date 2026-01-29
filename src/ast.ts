@@ -29,6 +29,7 @@ export interface Node extends Partial<Source> {
     doc?: string;
     declaration?: Source;
     args?: AST[];
+    rawExp?: RawExp;
 }
 
 /**
@@ -41,7 +42,8 @@ export interface Node extends Partial<Source> {
  * @returns The raw expression, or undefined if not available
  */
 export function getRawExp(node: Node): RawExp | undefined {
-    return (node as any)[rawExpSymbol];
+    return node.rawExp;
+    // return (node as any)[rawExpSymbol];
 }
 
 export function asNode(ast: AST | undefined): Node | undefined {
@@ -123,7 +125,8 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
         name: ast.name,
     };
     // Store rawExp using a Symbol to prevent accidental access, e.g. in logs which destroys the type annotations in the AST...
-    (node as any)[rawExpSymbol] = ast.rawExp;
+    // (node as any)[rawExpSymbol] = ast.rawExp;
+    node.rawExp = ast.rawExp;
     Object.defineProperty(node, 'parent', {
         value: parent,
         enumerable: false,
