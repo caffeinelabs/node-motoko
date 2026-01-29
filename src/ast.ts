@@ -126,7 +126,10 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
     };
     // Store rawExp using a Symbol to prevent accidental access, e.g. in logs which destroys the type annotations in the AST...
     // (node as any)[rawExpSymbol] = ast.rawExp;
-    node.rawExp = ast.rawExp;
+    Object.defineProperty(node, 'rawExp', {
+        value: ast.rawExp,
+        enumerable: false,
+    });
     Object.defineProperty(node, 'parent', {
         value: parent,
         enumerable: false,
