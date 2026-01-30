@@ -285,16 +285,16 @@ export default function wrapMotoko(compiler: Compiler) {
         },
         parseMotokoTyped,
         parseMotokoTypedWithScopeCache,
-        resolveDotCandidates(
+        contextualDotSuggestions(
             scope: RawScope,
             rawExp: RawExp,
         ): {
-            name: string;
-            type: string;
-            moduleName?: string;
+            moduleUrl: string;
+            funcName: string;
+            funcType: string;
         }[] {
             // TODO: consider not exposing the RawScope nor RawExp outside of this library...
-            return invoke('resolveDotCandidates', false, [scope, rawExp]);
+            return invoke('contextualDotSuggestions', false, [scope, rawExp]);
         },
         resolveMain(directory: string = ''): string | undefined {
             return resolveMain(mo, directory);
