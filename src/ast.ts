@@ -4,7 +4,8 @@ export type CompilerSpan = { name: 'Pos'; args: [string, string, string] };
 /** Opaque expression object from the Motoko compiler - do not construct manually */
 export type RawExp = unknown & { readonly __brand: 'RawExp' };
 
-const rawExpSymbol = Symbol('rawExp');
+/** Opaque scope object from the Motoko compiler - do not construct manually */
+export type RawScope = unknown & { readonly __brand: 'RawScope' };
 
 export interface CompilerNode {
     name: string;
@@ -29,21 +30,34 @@ export interface Node extends Partial<Source> {
     doc?: string;
     declaration?: Source;
     args?: AST[];
-    rawExp?: RawExp;
 }
 
 /**
- * Safely retrieves the raw expression from a node.
- * 
- * The raw expression is stored internally using a Symbol to prevent accidental access,
- * which can break property descriptors on child nodes (e.g., when logging).
- * 
- * @param node The node to get the raw expression from
- * @returns The raw expression, or undefined if not available
+ * Retrieves the raw expression from a node (internal use only).
  */
 export function getRawExp(node: Node): RawExp | undefined {
-    return node.rawExp;
-    // return (node as any)[rawExpSymbol];
+    return (node as any).rawExp;
+}
+
+/**
+ * Attaches a raw scope to a root node (internal use only).
+ */
+export function setRootScope(node: Node, scope: RawScope): void {
+    Object.defineProperty(node, 'rawScope', {
+        value: scope,
+        enumerable: false,
+    });
+}
+
+/**
+ * Retrieves the raw scope by traversing up to the root node (internal use only).
+ */
+export function getRootScope(node: Node): RawScope | undefined {
+    let current: Node | undefined = node;
+    while (current?.parent) {
+        current = current.parent;
+    }
+    return current ? (current as any).rawScope : undefined;
 }
 
 export function asNode(ast: AST | undefined): Node | undefined {
@@ -124,8 +138,7 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
     const node: Node = {
         name: ast.name,
     };
-    // Store rawExp using a Symbol to prevent accidental access, e.g. in logs which destroys the type annotations in the AST...
-    // (node as any)[rawExpSymbol] = ast.rawExp;
+    // Store rawExp as non-enumerable to hide from serialization/comparison
     Object.defineProperty(node, 'rawExp', {
         value: ast.rawExp,
         enumerable: false,

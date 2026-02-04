@@ -1,4 +1,4 @@
-import { CompilerNode, Node, RawExp, simplifyAST } from './ast';
+import { CompilerNode, Node, RawScope, simplifyAST, setRootScope, getRootScope, getRawExp } from './ast';
 import { Scope, file } from './file';
 import {
     Package,
@@ -13,9 +13,6 @@ import { resolveLib, resolveMain } from './utils/resolveEntryPoint';
 export type Motoko = ReturnType<typeof wrapMotoko>;
 
 type Compiler = any; // TODO: generate from `js_of_ocaml`?
-
-/** Opaque scope object from the Motoko compiler - do not construct manually */
-export type RawScope = unknown & { readonly __brand: 'RawScope' };
 
 export type Diagnostic = {
     source: string;
@@ -101,7 +98,6 @@ export default function wrapMotoko(compiler: Compiler) {
         ast: Node;
         type: Node;
         immediateImports: string[];
-        scope: RawScope;
     };
     function parseMotokoTypedWithScopeCache(
         paths: string,
@@ -153,11 +149,12 @@ export default function wrapMotoko(compiler: Compiler) {
                     immediateImports: string[];
                     scope: RawScope;
                 }) => {
+                    const simplifiedAst = simplifyAST(ast);
+                    setRootScope(simplifiedAst, scope);
                     return {
-                        ast: simplifyAST(ast),
+                        ast: simplifiedAst,
                         type: simplifyAST(typ),
                         immediateImports,
-                        scope,
                     };
                 },
             ),
@@ -286,14 +283,15 @@ export default function wrapMotoko(compiler: Compiler) {
         parseMotokoTyped,
         parseMotokoTypedWithScopeCache,
         contextualDotSuggestions(
-            scope: RawScope,
-            rawExp: RawExp,
+            node: Node,
         ): {
             moduleUrl: string;
             funcName: string;
             funcType: string;
-        }[] {
-            // TODO: consider not exposing the RawScope nor RawExp outside of this library...
+        }[] | undefined {
+            const rawExp = getRawExp(node);
+            const scope = getRootScope(node);
+            if (!rawExp || !scope) return undefined;
             return invoke('contextualDotSuggestions', false, [scope, rawExp]);
         },
         resolveMain(directory: string = ''): string | undefined {
