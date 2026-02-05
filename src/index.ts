@@ -285,7 +285,7 @@ export default function wrapMotoko(compiler: Compiler) {
         contextualDotSuggestions(
             node: Node,
         ): {
-            moduleUrl: string;
+            moduleUri: string;
             funcName: string;
             funcType: string;
         }[] | undefined {
@@ -293,6 +293,11 @@ export default function wrapMotoko(compiler: Compiler) {
             const scope = getRootScope(node);
             if (!rawExp || !scope) return undefined;
             return invoke('contextualDotSuggestions', false, [scope, rawExp]);
+        },
+        contextualDotModule(node: Node): { moduleNameOrUri: string; funcName: string } | undefined {
+            const rawExp = getRawExp(node);
+            if (!rawExp) return undefined;
+            return invoke('contextualDotModule', false, [rawExp]) ?? undefined;
         },
         resolveMain(directory: string = ''): string | undefined {
             return resolveMain(mo, directory);
