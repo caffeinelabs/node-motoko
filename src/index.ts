@@ -1,4 +1,12 @@
-import { CompilerNode, Node, RawScope, simplifyAST, setRootScope, getRootScope, getRawExp } from './ast';
+import {
+    CompilerNode,
+    Node,
+    RawScope,
+    simplifyAST,
+    setRootScope,
+    getRootScope,
+    getRawExp,
+} from './ast';
 import { Scope, file } from './file';
 import {
     Package,
@@ -63,8 +71,8 @@ export default function wrapMotoko(compiler: Compiler) {
             throw new Error(
                 result.diagnostics
                     ? result.diagnostics
-                        .map(({ message }: Diagnostic) => message)
-                        .join('; ')
+                          .map(({ message }: Diagnostic) => message)
+                          .join('; ')
                     : '(no diagnostics)',
             );
         }
@@ -114,12 +122,12 @@ export default function wrapMotoko(compiler: Compiler) {
         scopeCache: Map<string, Scope>,
         enableRecovery?: boolean,
     ): [
-            (
-                | ParseMotokoTypedWithScopeCacheResult
-                | ParseMotokoTypedWithScopeCacheResult[]
-            ),
-            Map<string, Scope>,
-        ] {
+        (
+            | ParseMotokoTypedWithScopeCacheResult
+            | ParseMotokoTypedWithScopeCacheResult[]
+        ),
+        Map<string, Scope>,
+    ] {
         if (enableRecovery === undefined) {
             enableRecovery = false;
         }
@@ -282,19 +290,21 @@ export default function wrapMotoko(compiler: Compiler) {
         },
         parseMotokoTyped,
         parseMotokoTypedWithScopeCache,
-        contextualDotSuggestions(
-            node: Node,
-        ): {
-            moduleUri: string;
-            funcName: string;
-            funcType: string;
-        }[] | undefined {
+        contextualDotSuggestions(node: Node):
+            | {
+                  moduleUri: string;
+                  funcName: string;
+                  funcType: string;
+              }[]
+            | undefined {
             const rawExp = getRawExp(node);
             const scope = getRootScope(node);
             if (!rawExp || !scope) return undefined;
             return invoke('contextualDotSuggestions', false, [scope, rawExp]);
         },
-        contextualDotModule(node: Node): { moduleNameOrUri: string; funcName: string } | undefined {
+        contextualDotModule(
+            node: Node,
+        ): { moduleNameOrUri: string; funcName: string } | undefined {
             const rawExp = getRawExp(node);
             if (!rawExp) return undefined;
             return invoke('contextualDotModule', false, [rawExp]) ?? undefined;
