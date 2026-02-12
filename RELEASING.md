@@ -43,7 +43,10 @@ Verify staged files look right and then commit, push, and open a PR:
 git commit -m "Update moc to $MOC_VERSION"
 git push --set-upstream origin $USER/$MOC_VERSION
 gh pr create --title "Update moc to $MOC_VERSION" --body ""
+gh pr view --web
 ```
+
+View, review, and merge the PR.
 
 ## Publish (after PR is merged)
 
