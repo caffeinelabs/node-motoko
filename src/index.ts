@@ -237,6 +237,15 @@ export default function wrapMotoko(compiler: Compiler) {
             const result = invoke('check', false, [path]);
             return result.diagnostics;
         },
+        checkWithScopeCache(
+            path: string,
+            scopeCache: Map<string, Scope>,
+        ): {
+            diagnostics: Diagnostic[];
+            scopeCache: Map<string, Scope> | null;
+        } {
+            return invoke('checkWithScopeCache', false, [path, scopeCache]);
+        },
         run(
             path: string,
             libPaths?: string[] | undefined,
