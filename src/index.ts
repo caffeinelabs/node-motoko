@@ -1,4 +1,13 @@
-import { CompilerNode, Node, simplifyAST } from './ast';
+import {
+    CompilerNode,
+    Node,
+    RawScope,
+    simplifyAST,
+    setRootScope,
+    getScope,
+    getRawExp,
+    AST,
+} from './ast';
 import { Scope, file } from './file';
 import {
     Package,
@@ -142,13 +151,17 @@ export default function wrapMotoko(compiler: Compiler) {
                     ast,
                     typ,
                     immediateImports,
+                    scope,
                 }: {
                     ast: CompilerNode;
                     typ: CompilerNode;
                     immediateImports: string[];
+                    scope: RawScope;
                 }) => {
+                    const simplifiedAst = simplifyAST(ast);
+                    setRootScope(simplifiedAst, scope);
                     return {
-                        ast: simplifyAST(ast),
+                        ast: simplifiedAst,
                         type: simplifyAST(typ),
                         immediateImports,
                     };
@@ -287,6 +300,28 @@ export default function wrapMotoko(compiler: Compiler) {
         },
         parseMotokoTyped,
         parseMotokoTypedWithScopeCache,
+        contextualDotSuggestions(
+            node: Node,
+            program: { ast: AST },
+        ):
+            | {
+                  moduleUri: string;
+                  funcName: string;
+                  funcType: string;
+              }[]
+            | undefined {
+            const rawExp = getRawExp(node);
+            const scope = getScope(program.ast);
+            if (!rawExp || !scope) return undefined;
+            return invoke('contextualDotSuggestions', false, [scope, rawExp]);
+        },
+        contextualDotModule(
+            node: Node,
+        ): { moduleNameOrUri: string; funcName: string } | undefined {
+            const rawExp = getRawExp(node);
+            if (!rawExp) return undefined;
+            return invoke('contextualDotModule', false, [rawExp]) ?? undefined;
+        },
         resolveMain(directory: string = ''): string | undefined {
             return resolveMain(mo, directory);
         },

@@ -1,9 +1,16 @@
 export type CompilerAST = CompilerAST[] | CompilerNode | string | null;
 export type CompilerSpan = { name: 'Pos'; args: [string, string, string] };
 
+/** Opaque expression object from the Motoko compiler - do not construct manually */
+export type RawExp = unknown & { readonly __brand: 'RawExp' };
+
+/** Opaque scope object from the Motoko compiler - do not construct manually */
+export type RawScope = unknown & { readonly __brand: 'RawScope' };
+
 export interface CompilerNode {
     name: string;
     args: CompilerAST[];
+    rawExp?: RawExp;
 }
 
 export type Span = [number, number];
@@ -19,10 +26,34 @@ export interface Node extends Partial<Source> {
     parent?: Node | undefined;
     name: string;
     type?: string;
-    typeRep?: Node,
+    typeRep?: Node;
     doc?: string;
     declaration?: Source;
     args?: AST[];
+}
+
+/**
+ * Retrieves the raw expression from a node (internal use only).
+ */
+export function getRawExp(node: Node): RawExp | undefined {
+    return (node as any).rawExp;
+}
+
+/**
+ * Attaches a raw scope to a root node (internal use only).
+ */
+export function setRootScope(node: Node, scope: RawScope): void {
+    Object.defineProperty(node, 'rawScope', {
+        value: scope,
+        enumerable: false,
+    });
+}
+
+/**
+ * Retrieves the raw scope directly from a node (internal use only).
+ */
+export function getScope(ast: AST): RawScope | undefined {
+    return (ast as any).rawScope;
 }
 
 export function asNode(ast: AST | undefined): Node | undefined {
@@ -81,8 +112,11 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
         };
     }
     if (ast.name === ':') {
-        const [typeAst, type, typeRep] = ast.args as
-            [CompilerNode, string, CompilerNode];
+        const [typeAst, type, typeRep] = ast.args as [
+            CompilerNode,
+            string,
+            CompilerNode,
+        ];
         const node =
             typeof typeAst === 'string'
                 ? { name: typeAst, parent }
@@ -103,6 +137,11 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
     const node: Node = {
         name: ast.name,
     };
+    // Store rawExp as non-enumerable to hide from serialization/comparison
+    Object.defineProperty(node, 'rawExp', {
+        value: ast.rawExp,
+        enumerable: false,
+    });
     Object.defineProperty(node, 'parent', {
         value: parent,
         enumerable: false,
@@ -112,19 +151,19 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
         // Inherit properties from parent for convenience.
         Object.defineProperty(node, 'type', {
             get: () => parent.type,
-            set: (newType) => parent.type = newType,
+            set: (newType) => (parent.type = newType),
             enumerable: true,
             configurable: true,
         });
         Object.defineProperty(node, 'typeRep', {
             get: () => parent.typeRep,
-            set: (newTypeRep) => parent.typeRep = newTypeRep,
+            set: (newTypeRep) => (parent.typeRep = newTypeRep),
             enumerable: true,
             configurable: true,
         });
         Object.defineProperty(node, 'doc', {
             get: () => parent.doc,
-            set: (newDoc) => parent.doc = newDoc,
+            set: (newDoc) => (parent.doc = newDoc),
             enumerable: true,
             configurable: true,
         });
