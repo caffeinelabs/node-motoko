@@ -4,8 +4,9 @@ import {
     RawScope,
     simplifyAST,
     setRootScope,
-    getRootScope,
+    getScope,
     getRawExp,
+    AST,
 } from './ast';
 import { Scope, file } from './file';
 import {
@@ -252,7 +253,10 @@ export default function wrapMotoko(compiler: Compiler) {
         checkWithScopeCache(
             path: string,
             scopeCache: Map<string, Scope>,
-        ): { diagnostics: Diagnostic[]; scopeCache: Map<string, Scope> | null } {
+        ): {
+            diagnostics: Diagnostic[];
+            scopeCache: Map<string, Scope> | null;
+        } {
             return invoke('checkWithScopeCache', false, [path, scopeCache]);
         },
         run(
@@ -296,7 +300,10 @@ export default function wrapMotoko(compiler: Compiler) {
         },
         parseMotokoTyped,
         parseMotokoTypedWithScopeCache,
-        contextualDotSuggestions(node: Node):
+        contextualDotSuggestions(
+            node: Node,
+            program: { ast: AST },
+        ):
             | {
                   moduleUri: string;
                   funcName: string;
@@ -304,7 +311,7 @@ export default function wrapMotoko(compiler: Compiler) {
               }[]
             | undefined {
             const rawExp = getRawExp(node);
-            const scope = getRootScope(node);
+            const scope = getScope(program.ast);
             if (!rawExp || !scope) return undefined;
             return invoke('contextualDotSuggestions', false, [scope, rawExp]);
         },

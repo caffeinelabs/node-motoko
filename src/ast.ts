@@ -26,7 +26,7 @@ export interface Node extends Partial<Source> {
     parent?: Node | undefined;
     name: string;
     type?: string;
-    typeRep?: Node,
+    typeRep?: Node;
     doc?: string;
     declaration?: Source;
     args?: AST[];
@@ -50,14 +50,10 @@ export function setRootScope(node: Node, scope: RawScope): void {
 }
 
 /**
- * Retrieves the raw scope by traversing up to the root node (internal use only).
+ * Retrieves the raw scope directly from a node (internal use only).
  */
-export function getRootScope(node: Node): RawScope | undefined {
-    let current: Node | undefined = node;
-    while (current?.parent) {
-        current = current.parent;
-    }
-    return current ? (current as any).rawScope : undefined;
+export function getScope(ast: AST): RawScope | undefined {
+    return (ast as any).rawScope;
 }
 
 export function asNode(ast: AST | undefined): Node | undefined {
@@ -116,8 +112,11 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
         };
     }
     if (ast.name === ':') {
-        const [typeAst, type, typeRep] = ast.args as
-            [CompilerNode, string, CompilerNode];
+        const [typeAst, type, typeRep] = ast.args as [
+            CompilerNode,
+            string,
+            CompilerNode,
+        ];
         const node =
             typeof typeAst === 'string'
                 ? { name: typeAst, parent }
@@ -152,19 +151,19 @@ export function simplifyAST(ast: CompilerAST, parent?: Node | undefined): AST {
         // Inherit properties from parent for convenience.
         Object.defineProperty(node, 'type', {
             get: () => parent.type,
-            set: (newType) => parent.type = newType,
+            set: (newType) => (parent.type = newType),
             enumerable: true,
             configurable: true,
         });
         Object.defineProperty(node, 'typeRep', {
             get: () => parent.typeRep,
-            set: (newTypeRep) => parent.typeRep = newTypeRep,
+            set: (newTypeRep) => (parent.typeRep = newTypeRep),
             enumerable: true,
             configurable: true,
         });
         Object.defineProperty(node, 'doc', {
             get: () => parent.doc,
-            set: (newDoc) => parent.doc = newDoc,
+            set: (newDoc) => (parent.doc = newDoc),
             enumerable: true,
             configurable: true,
         });
