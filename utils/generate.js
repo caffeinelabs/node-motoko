@@ -22,7 +22,7 @@ const motokoRepoPath =
             axios.get('https://api.github.com/repos/dfinity/motoko-core/tags'),
         ]);
         const latestMoc = mocRelease.data.tag_name;
-        const latestCore = coreTags.data[0]?.name;
+        const latestCore = coreTags.data[0]?.name?.replace(/^v/, '');
         console.log(`Latest Motoko : ${latestMoc}`);
         console.log(`Latest core   : ${latestCore}`);
         console.log();
@@ -110,7 +110,7 @@ const motokoRepoPath =
         );
 
         console.log('Downloading `core` package...');
-        const coreRepoPath = `dfinity/motoko-core/${coreVersion}/src`;
+        const coreRepoPath = `dfinity/motoko-core/v${coreVersion}/src`;
         const corePackageData = await fetchPackage('core', coreRepoPath);
         if (
             corePackageData.version !== coreVersion ||

@@ -8,17 +8,18 @@ npm ci
 npm run build
 ```
 
-Set the target Motoko version to the latest release:
+Run the generate script with no arguments to check the latest versions:
 
 ```bash
-export MOC_VERSION=$(gh release view --repo caffeinelabs/motoko --json tagName -q .tagName)
-echo "Latest Motoko version: $MOC_VERSION"
+npm run generate
 ```
 
-Generate the files for the target Motoko version:
+Verify the target versions, and then pass additional CLI args to generate the files:
 
 ```bash
-npm run generate $MOC_VERSION
+export MOC_VERSION=...
+export CORE_VERSION=...
+npm run generate $MOC_VERSION $CORE_VERSION
 ```
 
 Bump version:
