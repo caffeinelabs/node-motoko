@@ -84,9 +84,6 @@
             "path": "lib/index.js"
         },
         {
-            "path": "packages/latest/base.json"
-        },
-        {
             "path": "packages/latest/core.json"
         },
         {

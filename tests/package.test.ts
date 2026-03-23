@@ -1,21 +1,18 @@
 import mo from '../src/versions/moc';
 
 describe('fetchPackage', () => {
-    // test('fetch base library', async () => {
+    // test('fetch core library', async () => {
     //     const pkg = (await mo.fetchPackage(
-    //         'base',
-    //         'dfinity/motoko-base/master/src',
+    //         'core',
+    //         'dfinity/motoko-core/main/src',
     //     ))!;
     //     expect(pkg).toBeTruthy();
-    //     expect(pkg.name).toStrictEqual('base');
-    //     expect(pkg.version).toStrictEqual('master');
+    //     expect(pkg.name).toStrictEqual('core');
     //     expect(Object.keys(pkg.files)).toContain('Debug.mo');
-    //     // expect file in package
     // });
 
-    test('load base library', () => {
-        // await mo.installPackages({ base: 'dfinity/motoko-base/master/src' });
-        mo.loadPackage(require('../packages/latest/base.json'));
+    test('load core library', () => {
+        mo.loadPackage(require('../packages/latest/core.json'));
 
         const file = mo.file('Test.mo');
         file.write('import Debug "mo:core/Debug"; Debug.print(debug_show 123)');

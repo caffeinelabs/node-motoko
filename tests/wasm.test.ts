@@ -13,7 +13,7 @@ describe('wasm', () => {
     let pocketIc: PocketIc;
 
     beforeAll(async () => {
-        mo.loadPackage(require('../packages/latest/base.json'));
+        mo.loadPackage(require('../packages/latest/core.json'));
 
         pocketIcServer = await PocketIcServer.start({
             showRuntimeLogs: false,
@@ -57,7 +57,6 @@ describe('wasm', () => {
                 ),
             });
         }, canisterId);
-
 
         // Test individual function call
         const sortResult = await actor.sortAndRemoveDuplicates([3, 2, 1, 2]);

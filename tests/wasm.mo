@@ -1,12 +1,11 @@
-import Int "mo:base/Int";
-import OrderedSet "mo:base/OrderedSet";
-import Iter "mo:base/Iter";
+import Int "mo:core/Int";
+import Set "mo:core/Set";
+import Iter "mo:core/Iter";
 
 persistent actor {
     public func sortAndRemoveDuplicates(array : [Int]) : async [Int] {
-        let Set = OrderedSet.Make<Int>(Int.compare);
-        let set = Set.fromIter(Iter.fromArray(array));
-        Iter.toArray(Set.vals(set));
+        let set = Set.fromIter(array.values(), Int.compare);
+        Iter.toArray(Set.values(set));
     };
 
     public func run() : async () {

@@ -2,7 +2,7 @@
 
 const mo = require('../lib/versions/moc').default;
 
-mo.loadPackage(require('../packages/latest/base.json'));
+mo.loadPackage(require('../packages/latest/core.json'));
 
 const file = mo.file('Main.mo');
 file.write(`
