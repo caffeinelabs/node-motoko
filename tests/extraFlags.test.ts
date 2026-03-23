@@ -11,7 +11,6 @@ ignore A.foo;
 
 describe('extra moc flags', () => {
     beforeAll(() => {
-        mo.loadPackage(require('../packages/latest/base.json'));
         mo.loadPackage(require('../packages/latest/core.json'));
     });
 

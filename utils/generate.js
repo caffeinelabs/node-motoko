@@ -6,23 +6,32 @@ const { execSync } = require('child_process');
 const axios = require('axios');
 const { fetchPackage } = require('../lib/package');
 
-const baseVersion = 'moc-0.15.0'; // Soon to be replaced by `core`
-const coreVersion = 'preview-0.6.0';
-
 const version = process.argv[2];
+const coreVersion = process.argv[3];
 const isLocalBuild = version === 'local';
-
-if (!isLocalBuild && !/\d+\.\d+\.\d+/.test(version)) {
-    console.error(
-        `Please pass a valid Motoko version or 'local' to the 'generate' script. Received ${version}`,
-    );
-    process.exit(1);
-}
 
 const motokoRepoPath =
     process.env.MOTOKO_REPO || resolve(__dirname, '../../motoko/');
 
 (async () => {
+    if (!version || !coreVersion) {
+        const [mocRelease, coreTags] = await Promise.all([
+            axios.get(
+                'https://api.github.com/repos/dfinity/motoko/releases/latest',
+            ),
+            axios.get('https://api.github.com/repos/dfinity/motoko-core/tags'),
+        ]);
+        const latestMoc = mocRelease.data.tag_name;
+        const latestCore = coreTags.data[0]?.name;
+        console.log(`Latest Motoko : ${latestMoc}`);
+        console.log(`Latest core   : ${latestCore}`);
+        console.log();
+        console.log('Verify and run:');
+        console.log(`$ npm run generate ${latestMoc} ${latestCore}`);
+        console.log();
+        process.exit(0);
+    }
+
     async function copyFile(buildDir, destDir, sourceFileName, destFileName) {
         const sourcePath = join(buildDir, sourceFileName);
         const destPath = join(destDir, destFileName);
@@ -100,25 +109,19 @@ const motokoRepoPath =
             ).data,
         );
 
-        const packages = [
-            { name: 'base', version: baseVersion },
-            { name: 'core', version: coreVersion },
-        ];
-        for (const { name, version } of packages) {
-            console.log(`Downloading \`${name}\` package...`);
-            const repoPath = `dfinity/motoko-${name}/${version}/src`;
-            const packageData = await fetchPackage(name, repoPath);
-            if (
-                packageData.version !== version ||
-                !Object.entries(packageData.files).length
-            ) {
-                throw new Error('Unexpected package format');
-            }
-            await fs.writeFile(
-                __dirname + `/../packages/latest/${name}.json`,
-                JSON.stringify(packageData),
-            );
+        console.log('Downloading `core` package...');
+        const coreRepoPath = `dfinity/motoko-core/${coreVersion}/src`;
+        const corePackageData = await fetchPackage('core', coreRepoPath);
+        if (
+            corePackageData.version !== coreVersion ||
+            !Object.entries(corePackageData.files).length
+        ) {
+            throw new Error('Unexpected package format');
         }
+        await fs.writeFile(
+            __dirname + '/../packages/latest/core.json',
+            JSON.stringify(corePackageData),
+        );
     }
 
     console.log('Updating error code explanations...');
