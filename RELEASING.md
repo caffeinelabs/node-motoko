@@ -42,7 +42,9 @@ The [`release`](.github/workflows/release.yml) workflow will automatically:
    - **Repository owner:** `caffeinelabs`
    - **Repository name:** `node-motoko`
    - **Workflow filename:** `release.yml`
+   - **Environment:** `npm`
 4. Save
+5. In GitHub repo settings (Settings > Environments), create an environment named `npm`
 
 ### GitHub App token
 
@@ -67,7 +69,7 @@ Add a step at the end of the `publish` job in
     token: ${{ steps.app-token.outputs.token }}
     repository: caffeinelabs/node-motoko
     event-type: motoko-release
-    client-payload: '{"version": "${{ github.ref_name }}"}'
+    client-payload: '{"version": ${{ toJSON(github.ref_name) }}}'
 ```
 
 The GitHub App (`GENERIC_CI_RW_APP_ID`) must also have write access to `caffeinelabs/node-motoko`

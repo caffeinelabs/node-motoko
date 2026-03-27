@@ -79,7 +79,7 @@ jobs:
           MOTOKO_REPO: ${{ github.workspace }}/motoko-src
           MOC_VERSION: ${{ steps.versions.outputs.moc_version }}
           CORE_VERSION: ${{ steps.versions.outputs.core_version }}
-        run: npm run generate "$MOC_VERSION" "$CORE_VERSION"
+        run: npm run generate -- "$MOC_VERSION" "$CORE_VERSION"
 
       - name: Bump version
         env:
