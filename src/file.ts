@@ -73,8 +73,15 @@ export const file = (mo: Motoko, path: string) => {
         parseMotokoTyped() {
             return mo.parseMotokoTyped(path);
         },
-        parseMotokoTypedWithScopeCache(scopeCache: Map<string, Scope>, enableRecovery?: boolean) {
-            return mo.parseMotokoTypedWithScopeCache(path, scopeCache, enableRecovery);
+        parseMotokoTypedWithScopeCache(
+            scopeCache: Map<string, Scope>,
+            enableRecovery?: boolean,
+        ) {
+            return mo.parseMotokoTypedWithScopeCache(
+                path,
+                scopeCache,
+                enableRecovery,
+            );
         },
     };
     return result;
