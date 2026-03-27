@@ -58,7 +58,16 @@ jobs:
 
           CORE_VERSION="$INPUT_CORE"
           if [ -z "$CORE_VERSION" ]; then
-            CORE_VERSION=$(gh api repos/caffeinelabs/motoko-core/tags --jq '.[0].name')
+            CORE_VERSION=$(gh api repos/caffeinelabs/motoko-core/tags --jq '.[0].name // empty')
+          fi
+
+          if [ -z "$MOC_VERSION" ]; then
+            echo "::error::Failed to resolve moc version"
+            exit 1
+          fi
+          if [ -z "$CORE_VERSION" ]; then
+            echo "::error::Failed to resolve core version"
+            exit 1
           fi
 
           echo "moc_version=$MOC_VERSION" >> "$GITHUB_OUTPUT"
