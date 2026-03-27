@@ -37,3 +37,26 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --provenance
+
+  # Runs after npm publish; failures here do not affect the published package (re-run this job only if needed).
+  notify-vscode-motoko:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: dispatch-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.GENERIC_CI_RW_APP_ID }}
+          private-key: ${{ secrets.GENERIC_CI_RW_APP_PRIVATE_KEY }}
+          owner: caffeinelabs
+          repositories: |
+            vscode-motoko
+
+      - name: Trigger vscode-motoko (bump motoko npm in extension)
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ steps.dispatch-token.outputs.token }}
+          repository: caffeinelabs/vscode-motoko
+          event-type: motoko-release
+          client-payload: '{"version":"${{ github.event.release.tag_name }}"}'

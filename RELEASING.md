@@ -31,6 +31,7 @@ The [`release`](.github/workflows/release.yml) workflow will automatically:
 - Validate the tag matches `package.json`
 - Build and test
 - Publish to npm via [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers) (no tokens needed)
+- Notify [vscode-motoko](https://github.com/caffeinelabs/vscode-motoko) to open a PR bumping the `motoko` dependency (GitHub App must include the `vscode-motoko` repo; same app as `update-moc`)
 
 ## Local development (generate)
 
