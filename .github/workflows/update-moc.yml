@@ -89,6 +89,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Clean up motoko-src
+        run: rm -rf motoko-src
+
       - name: Generate GitHub App token
         id: app-token
         uses: actions/create-github-app-token@v1
