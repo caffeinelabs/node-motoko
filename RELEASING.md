@@ -32,49 +32,6 @@ The [`release`](.github/workflows/release.yml) workflow will automatically:
 - Build and test
 - Publish to npm via [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers) (no tokens needed)
 
-## Setup (one-time)
-
-### npm trusted publishing
-
-1. Ensure 2FA is enabled on the npm account that owns the `motoko` package
-2. Go to https://www.npmjs.com/package/motoko/access
-3. In the **Trusted Publisher** section, select **GitHub Actions** and fill in:
-   - **Repository owner:** `caffeinelabs`
-   - **Repository name:** `node-motoko`
-   - **Workflow filename:** `release.yml`
-   - **Environment:** `npm`
-4. Save
-5. In GitHub repo settings (Settings > Environments), create an environment named `npm`
-
-### GitHub App token
-
-The `update-moc` workflow uses a GitHub App token (via `GENERIC_CI_RW_APP_ID` / `GENERIC_CI_RW_APP_PRIVATE_KEY`)
-so that auto-created PRs trigger CI checks. PRs created with the default `GITHUB_TOKEN`
-[do not trigger other workflows](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow).
-
-Ensure the GitHub App is installed on `caffeinelabs/node-motoko` with `contents: write`
-and `pull_requests: write` permissions, and that the app ID / private key are available as
-`vars.GENERIC_CI_RW_APP_ID` and `secrets.GENERIC_CI_RW_APP_PRIVATE_KEY`.
-
-### repository_dispatch from motoko repo
-
-Add a step at the end of the `publish` job in
-[caffeinelabs/motoko/.github/workflows/release.yml](https://github.com/caffeinelabs/motoko/blob/master/.github/workflows/release.yml):
-
-```yaml
-- name: Notify node-motoko of new release
-  if: ${{ github.event_name == 'push' }}
-  uses: peter-evans/repository-dispatch@v3
-  with:
-    token: ${{ steps.app-token.outputs.token }}
-    repository: caffeinelabs/node-motoko
-    event-type: motoko-release
-    client-payload: '{"version": ${{ toJSON(github.ref_name) }}}'
-```
-
-The GitHub App (`GENERIC_CI_RW_APP_ID`) must also have write access to `caffeinelabs/node-motoko`
-for cross-repo dispatch to work.
-
 ## Local development (generate)
 
 To regenerate files locally against a specific version:
