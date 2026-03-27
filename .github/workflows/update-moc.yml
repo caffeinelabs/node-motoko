@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       moc_version:
-        description: 'Motoko version tag (e.g. 0.13.0). Leave empty to auto-detect latest.'
+        description: 'Motoko version tag (e.g. 1.4.0). Leave empty to auto-detect latest.'
         required: false
       core_version:
         description: 'motoko-core version tag. Leave empty to auto-detect latest.'
