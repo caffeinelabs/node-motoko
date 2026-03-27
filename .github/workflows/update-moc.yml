@@ -1,0 +1,113 @@
+name: Update moc
+
+on:
+  repository_dispatch:
+    types: [motoko-release]
+  workflow_dispatch:
+    inputs:
+      moc_version:
+        description: 'Motoko version tag (e.g. 1.4.0). Leave empty to auto-detect latest.'
+        required: false
+      core_version:
+        description: 'motoko-core version tag. Leave empty to auto-detect latest.'
+        required: false
+      version_bump:
+        description: 'Version bump type'
+        required: false
+        default: 'minor'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+concurrency:
+  group: update-moc
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  update-moc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Resolve versions
+        id: versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCH_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ inputs.moc_version }}
+          INPUT_CORE: ${{ inputs.core_version }}
+        run: |
+          MOC_VERSION="${DISPATCH_VERSION:-$INPUT_VERSION}"
+          if [ -z "$MOC_VERSION" ]; then
+            MOC_VERSION=$(gh release view --repo caffeinelabs/motoko --json tagName -q .tagName)
+          fi
+
+          CORE_VERSION="$INPUT_CORE"
+          if [ -z "$CORE_VERSION" ]; then
+            CORE_VERSION=$(gh api repos/caffeinelabs/motoko-core/tags --jq '.[0].name')
+          fi
+
+          echo "moc_version=$MOC_VERSION" >> "$GITHUB_OUTPUT"
+          echo "core_version=$CORE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved: moc=$MOC_VERSION core=$CORE_VERSION"
+
+      - name: Checkout motoko repo (error codes only)
+        env:
+          MOC_VERSION: ${{ steps.versions.outputs.moc_version }}
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            --branch "$MOC_VERSION" \
+            https://github.com/caffeinelabs/motoko.git motoko-src
+          cd motoko-src && git sparse-checkout set src/lang_utils/error_codes
+
+      - name: Generate
+        env:
+          MOTOKO_REPO: ${{ github.workspace }}/motoko-src
+          MOC_VERSION: ${{ steps.versions.outputs.moc_version }}
+          CORE_VERSION: ${{ steps.versions.outputs.core_version }}
+        run: npm run generate -- "$MOC_VERSION" "$CORE_VERSION"
+
+      - name: Bump version
+        env:
+          VERSION_BUMP: ${{ inputs.version_bump || 'minor' }}
+        run: npm version "$VERSION_BUMP" --no-git-tag-version
+
+      - name: Run tests
+        run: npm test
+
+      - name: Clean up motoko-src
+        run: rm -rf motoko-src
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.GENERIC_CI_RW_APP_ID }}
+          private-key: ${{ secrets.GENERIC_CI_RW_APP_PRIVATE_KEY }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: auto/moc-${{ steps.versions.outputs.moc_version }}
+          title: 'Update moc to ${{ steps.versions.outputs.moc_version }}'
+          body: |
+            Automated PR to update bundled moc to `${{ steps.versions.outputs.moc_version }}` (core: `${{ steps.versions.outputs.core_version }}`).
+
+            Triggered by: `${{ github.event_name }}`
+          commit-message: 'Update moc to ${{ steps.versions.outputs.moc_version }}'
+          delete-branch: true

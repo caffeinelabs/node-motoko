@@ -1,56 +1,47 @@
-# Updating `moc`
+# Releasing
 
-Setup:
+## Automated moc updates
+
+When a new Motoko version is released at [caffeinelabs/motoko](https://github.com/caffeinelabs/motoko),
+the [`update-moc`](.github/workflows/update-moc.yml) workflow is triggered via `repository_dispatch`.
+It automatically:
+
+1. Downloads the new `moc.js` / `moc_interpreter.js` and core library
+2. Updates error code explanations
+3. Bumps the npm version (minor)
+4. Runs tests
+5. Opens a PR titled "Update moc to \<version\>"
+
+Review and merge the PR when ready.
+
+### Manual trigger
+
+You can also trigger the workflow manually from the Actions tab (`workflow_dispatch`),
+with optional `moc_version` and `core_version` inputs. Leave them empty to auto-detect the latest.
+
+## Publishing to npm
+
+After merging a moc update (or any version bump), create a **GitHub Release**:
+
+1. Go to [Releases](https://github.com/caffeinelabs/node-motoko/releases/new)
+2. Create a new tag matching the `package.json` version (e.g. `v4.1.0`)
+3. Click "Publish release"
+
+The [`release`](.github/workflows/release.yml) workflow will automatically:
+- Validate the tag matches `package.json`
+- Build and test
+- Publish to npm via [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers) (no tokens needed)
+
+## Local development (generate)
+
+To regenerate files locally against a specific version:
 
 ```bash
-git switch main && git pull
 npm ci
 npm run build
+npm run generate  # prints latest versions and suggested command
+npm run generate <moc_version> <core_version>
 ```
 
-Set the target Motoko version to the latest release:
-
-```bash
-export MOC_VERSION=$(gh release view --repo caffeinelabs/motoko --json tagName -q .tagName)
-echo "Latest Motoko version: $MOC_VERSION"
-```
-
-Generate the files for the target Motoko version:
-
-```bash
-npm run generate $MOC_VERSION
-```
-
-Bump version:
-
-```bash
-npm version minor --no-git-tag-version
-```
-
-Or `patch` / `major` as appropriate.
-The `--no-git-tag-version` flag prevents npm from auto-committing and tagging — we do that manually below.
-
-Setup PR branch:
-
-```bash
-git switch -c $USER/$MOC_VERSION
-git add -A
-```
-
-Verify staged files look right and then commit, push, and open a PR:
-
-```bash
-git commit -m "Update moc to $MOC_VERSION"
-git push --set-upstream origin $USER/$MOC_VERSION
-gh pr create --title "Update moc to $MOC_VERSION" --body ""
-gh pr view --web
-```
-
-View, review, and merge the PR.
-
-## Publish (after PR is merged)
-
-```bash
-git switch main && git pull
-npm publish
-```
+Set `MOTOKO_REPO` to point to a local motoko checkout (used for error codes).
+Defaults to `../../motoko/`.

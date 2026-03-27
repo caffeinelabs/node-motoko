@@ -1,6 +1,6 @@
 {
     "name": "motoko",
-    "version": "4.0.0",
+    "version": "4.1.0",
     "description": "Compile and run Motoko smart contracts in Node.js or the browser.",
     "author": "Ryan Vandersmith (https://github.com/rvanasa)",
     "license": "Apache-2.0",
@@ -8,7 +8,7 @@
     "types": "lib/versions/moc.d.ts",
     "repository": {
         "type": "git",
-        "url": "https://github.com/dfinity/node-motoko.git"
+        "url": "https://github.com/caffeinelabs/node-motoko.git"
     },
     "scripts": {
         "build": "rimraf ./lib && tsc -p .",
