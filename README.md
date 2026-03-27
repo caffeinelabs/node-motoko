@@ -1,5 +1,5 @@
 
-# `motoko` &nbsp;[![npm version](https://img.shields.io/npm/v/motoko.svg?logo=npm)](https://www.npmjs.com/package/motoko) [![GitHub license](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/dfinity/motoko/issues)
+# `motoko` &nbsp;[![npm version](https://img.shields.io/npm/v/motoko.svg?logo=npm)](https://www.npmjs.com/package/motoko) [![GitHub license](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/caffeinelabs/motoko/issues)
 
 > #### Compile and run [Motoko](https://smartcontracts.org/) smart contracts in Node.js or the browser.
 
@@ -60,7 +60,7 @@ mo.file('Main.mo')
 ```js
 mo.clearPackages();
 await mo.installPackages({
-    core: 'dfinity/motoko-core/main/src', // import "mo:core/...";
+    core: 'caffeinelabs/motoko-core/main/src', // import "mo:core/...";
 });
 ```
 
@@ -103,7 +103,7 @@ mo.list(path)
 
 // Fetch a package from GitHub or jsDelivr
 await mo.fetchPackage(name, source);
-await mo.fetchPackage('base', 'dfinity/motoko-base/master/src');
+await mo.fetchPackage('base', 'caffeinelabs/motoko-base/master/src');
 
 // Try to fetch and load packages from GitHub or jsDelivr
 await mo.installPackages({ [packageName]: repositoryPath, ... })

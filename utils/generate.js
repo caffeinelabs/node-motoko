@@ -17,9 +17,11 @@ const motokoRepoPath =
     if (!version || !coreVersion) {
         const [mocRelease, coreTags] = await Promise.all([
             axios.get(
-                'https://api.github.com/repos/dfinity/motoko/releases/latest',
+                'https://api.github.com/repos/caffeinelabs/motoko/releases/latest',
             ),
-            axios.get('https://api.github.com/repos/dfinity/motoko-core/tags'),
+            axios.get(
+                'https://api.github.com/repos/caffeinelabs/motoko-core/tags',
+            ),
         ]);
         const latestMoc = mocRelease.data.tag_name;
         const latestCore = coreTags.data[0]?.name;
@@ -96,7 +98,7 @@ const motokoRepoPath =
             resolve(__dirname, `../versions/latest/moc.min.js`),
             (
                 await axios.get(
-                    `https://github.com/dfinity/motoko/releases/download/${version}/moc-${version}.js`,
+                    `https://github.com/caffeinelabs/motoko/releases/download/${version}/moc-${version}.js`,
                 )
             ).data,
         );
@@ -104,13 +106,13 @@ const motokoRepoPath =
             resolve(__dirname, `../versions/latest/moc_interpreter.min.js`),
             (
                 await axios.get(
-                    `https://github.com/dfinity/motoko/releases/download/${version}/moc-interpreter-${version}.js`,
+                    `https://github.com/caffeinelabs/motoko/releases/download/${version}/moc-interpreter-${version}.js`,
                 )
             ).data,
         );
 
         console.log('Downloading `core` package...');
-        const coreRepoPath = `dfinity/motoko-core/${coreVersion}/src`;
+        const coreRepoPath = `caffeinelabs/motoko-core/${coreVersion}/src`;
         const corePackageData = await fetchPackage('core', coreRepoPath);
         if (
             corePackageData.version !== coreVersion ||
