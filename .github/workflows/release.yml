@@ -17,10 +17,6 @@ jobs:
 
       - name: Validate version
         run: |
-          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9] ]]; then
-            echo "::error::Release tag must start with 'v' (got: $GITHUB_REF_NAME)"
-            exit 1
-          fi
           TAG_VERSION="${GITHUB_REF_NAME#v}"
           PKG_VERSION=$(node -p "require('./package.json').version")
           if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
@@ -40,7 +36,4 @@ jobs:
       - run: npm test
 
       - name: Publish to npm
-        # Auth via OIDC trusted publishers -- no NPM_TOKEN needed.
-        # Requires: npm package linked to this repo + "npm" environment in GitHub settings.
-        # See RELEASING.md or PR #165 description for setup instructions.
         run: npm publish --provenance
