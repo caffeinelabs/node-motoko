@@ -1,8 +1,6 @@
 name: Update moc
 
 on:
-  push:
-    branches: [automate-releases]
   repository_dispatch:
     types: [motoko-release]
   workflow_dispatch:
@@ -91,21 +89,22 @@ jobs:
       - name: Run tests
         run: npm test
 
-      # TEMP: PR creation skipped for dry-run test
-      # - name: Generate GitHub App token
-      #   id: app-token
-      #   uses: actions/create-github-app-token@v1
-      #   with:
-      #     app-id: ${{ vars.GENERIC_CI_RW_APP_ID }}
-      #     private-key: ${{ secrets.GENERIC_CI_RW_APP_PRIVATE_KEY }}
-      # - name: Create Pull Request
-      #   uses: peter-evans/create-pull-request@v7
-      #   with:
-      #     token: ${{ steps.app-token.outputs.token }}
-      #     branch: auto/moc-${{ steps.versions.outputs.moc_version }}
-      #     title: 'Update moc to ${{ steps.versions.outputs.moc_version }}'
-      #     body: |
-      #       Automated PR to update bundled moc to `${{ steps.versions.outputs.moc_version }}` (core: `${{ steps.versions.outputs.core_version }}`).
-      #       Triggered by: `${{ github.event_name }}`
-      #     commit-message: 'Update moc to ${{ steps.versions.outputs.moc_version }}'
-      #     delete-branch: true
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.GENERIC_CI_RW_APP_ID }}
+          private-key: ${{ secrets.GENERIC_CI_RW_APP_PRIVATE_KEY }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: auto/moc-${{ steps.versions.outputs.moc_version }}
+          title: 'Update moc to ${{ steps.versions.outputs.moc_version }}'
+          body: |
+            Automated PR to update bundled moc to `${{ steps.versions.outputs.moc_version }}` (core: `${{ steps.versions.outputs.core_version }}`).
+
+            Triggered by: `${{ github.event_name }}`
+          commit-message: 'Update moc to ${{ steps.versions.outputs.moc_version }}'
+          delete-branch: true
