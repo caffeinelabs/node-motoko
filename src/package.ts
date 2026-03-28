@@ -85,8 +85,7 @@ async function fetchPackageFiles(
             if (result) {
                 return result;
             }
-        }
-        catch(err) {
+        } catch (err) {
             console.error('[CDN]', err);
         }
     }

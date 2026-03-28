@@ -130,9 +130,7 @@ const motokoRepoPath =
     const errorCodes = {};
     const errorCodesPath = join(motokoRepoPath, 'src/lang_utils/error_codes');
     await Promise.all(
-        (
-            await fs.readdir(errorCodesPath)
-        ).map(async (file) => {
+        (await fs.readdir(errorCodesPath)).map(async (file) => {
             const suffix = '.md';
             if (!file.endsWith(suffix)) {
                 throw new Error(
