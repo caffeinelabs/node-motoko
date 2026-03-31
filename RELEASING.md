@@ -29,9 +29,7 @@ The [`release`](.github/workflows/release.yml) workflow runs when `package.json`
 - Publish to npm via [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers) (no tokens needed)
 - Notify [vscode-motoko](https://github.com/caffeinelabs/vscode-motoko) to open a PR bumping the `motoko` dependency (GitHub App must include the `vscode-motoko` repo; same app as `update-moc`)
 
-Edits to `package.json` that do not change `version` (for example dependency bumps only) do not trigger a publish.
-
-You can still tag releases on GitHub for changelog visibility; publishing is driven by the version bump on `main`, not by the GitHub Release event.
+Updating the version in `package.json` automatically publishes the package when merged into `main`.
 
 ## Local development (generate)
 

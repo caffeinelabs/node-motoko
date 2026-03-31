@@ -1,0 +1,78 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.check.outputs.changed }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect package.json version bump
+        id: check
+        run: |
+          set -euo pipefail
+          NEW=$(node -p "require('./package.json').version")
+          echo "version=${NEW}" >> "$GITHUB_OUTPUT"
+          BEFORE="${{ github.event.before }}"
+          OLD=$(git show "${BEFORE}:package.json" 2>/dev/null | jq -r .version 2>/dev/null) || OLD=""
+          echo "changed=$([[ "$BEFORE" =~ ^0{40}$ || "$OLD" != "$NEW" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: version-check
+    if: needs.version-check.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+      - name: Publish to npm
+        run: npm publish --provenance
+
+  # Runs after npm publish; failures here do not affect the published package (re-run this job only if needed).
+  notify-vscode-motoko:
+    needs: [publish, version-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: dispatch-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.GENERIC_CI_RW_APP_ID }}
+          private-key: ${{ secrets.GENERIC_CI_RW_APP_PRIVATE_KEY }}
+          owner: caffeinelabs
+          repositories: |
+            vscode-motoko
+
+      - name: Trigger vscode-motoko (bump motoko npm in extension)
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ steps.dispatch-token.outputs.token }}
+          repository: caffeinelabs/vscode-motoko
+          event-type: motoko-release
+          client-payload: '{"version":"v${{ needs.version-check.outputs.version }}"}'
