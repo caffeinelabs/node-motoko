@@ -1,28 +1,44 @@
-name: Release
+name: Publish
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.check.outputs.changed }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect package.json version bump
+        id: check
+        run: |
+          set -euo pipefail
+          NEW=$(node -p "require('./package.json').version")
+          echo "version=${NEW}" >> "$GITHUB_OUTPUT"
+          BEFORE="${{ github.event.before }}"
+          OLD=$(git show "${BEFORE}:package.json" 2>/dev/null | jq -r .version 2>/dev/null) || OLD=""
+          echo "changed=$([[ "$BEFORE" =~ ^0{40}$ || "$OLD" != "$NEW" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
   publish:
+    needs: version-check
+    if: needs.version-check.outputs.version_changed == 'true'
     runs-on: ubuntu-latest
     environment: npm
     steps:
       - uses: actions/checkout@v4
-
-      - name: Validate version
-        run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
-            echo "::error::Tag version ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
-            exit 1
-          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,7 +56,7 @@ jobs:
 
   # Runs after npm publish; failures here do not affect the published package (re-run this job only if needed).
   notify-vscode-motoko:
-    needs: publish
+    needs: [publish, version-check]
     runs-on: ubuntu-latest
     steps:
       - name: Generate GitHub App token
@@ -59,4 +75,4 @@ jobs:
           token: ${{ steps.dispatch-token.outputs.token }}
           repository: caffeinelabs/vscode-motoko
           event-type: motoko-release
-          client-payload: '{"version":"${{ github.event.release.tag_name }}"}'
+          client-payload: '{"version":"v${{ needs.version-check.outputs.version }}"}'

@@ -21,17 +21,15 @@ with optional `moc_version` and `core_version` inputs. Leave them empty to auto-
 
 ## Publishing to npm
 
-After merging a moc update (or any version bump), create a **GitHub Release**:
+After merging a moc update (or any version bump), bump the **`version`** field in `package.json` and merge to `main`.
 
-1. Go to [Releases](https://github.com/caffeinelabs/node-motoko/releases/new)
-2. Create a new tag matching the `package.json` version (e.g. `v4.1.0`)
-3. Click "Publish release"
+The [`release`](.github/workflows/release.yml) workflow runs when `package.json` changes on `main`. If the **version** field changed compared to the previous commit on `main`, it will:
 
-The [`release`](.github/workflows/release.yml) workflow will automatically:
-- Validate the tag matches `package.json`
 - Build and test
 - Publish to npm via [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers) (no tokens needed)
 - Notify [vscode-motoko](https://github.com/caffeinelabs/vscode-motoko) to open a PR bumping the `motoko` dependency (GitHub App must include the `vscode-motoko` repo; same app as `update-moc`)
+
+Updating the version in `package.json` automatically publishes the package when merged into `main`.
 
 ## Local development (generate)
 
