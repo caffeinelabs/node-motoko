@@ -7,7 +7,7 @@ import path from 'path';
 const actorSource = `
 import { print } "mo:core/Debug";
 
-persistent actor Main {
+actor Main {
     public query func test() : async Nat {
         123
     }
@@ -17,7 +17,7 @@ persistent actor Main {
 const badActorSource = `
 import { print } "mo:core/Debug"; // New 'core' package
 
-persistent actor Main {
+actor Main {
 
     let x = 1
     public query test() : async Nat {

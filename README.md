@@ -133,9 +133,8 @@ mo.setRunStepLimit(limit)
 // Generate errors and warnings for a Motoko program
 mo.check(path)
 
-// Run a Motoko program with optional virtual library paths
+// Run a Motoko program (split programs across files with imports)
 mo.run(path)
-mo.run(path, [libraryPath, ...])
 
 // Generate the Candid interface for a Motoko program
 mo.candid(path)

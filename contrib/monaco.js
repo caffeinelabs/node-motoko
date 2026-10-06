@@ -32,7 +32,6 @@ exports.configure = (monaco, { snippets } = {}) => {
         accessmodifiers: [
             'public',
             'private',
-            'flexible',
             'query',
             'shared',
             'stable',
