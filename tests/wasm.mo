@@ -2,10 +2,10 @@ import Int "mo:core/Int";
 import Set "mo:core/Set";
 import Iter "mo:core/Iter";
 
-persistent actor {
+actor {
     public func sortAndRemoveDuplicates(array : [Int]) : async [Int] {
         let set = Set.fromIter(array.values(), Int.compare);
-        Iter.toArray(Set.values(set));
+        set.values().toArray();
     };
 
     public func run() : async () {

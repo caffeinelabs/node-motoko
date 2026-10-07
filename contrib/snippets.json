@@ -186,7 +186,7 @@
         ],
         "body": [
             "actor {",
-            "\tstable var ${1:state} = ${2:0};",
+            "\tvar ${1:state} = ${2:0};",
             "\t",
             "\tpublic func ${3:name}(${4:arg : Text}) : async ${5:()} {",
             "\t\t$0",
@@ -200,7 +200,7 @@
         ],
         "body": [
             "actor class ${1:Name}($2) = self {",
-            "\tstable var ${3:state} = ${4:0};",
+            "\tvar ${3:state} = ${4:0};",
             "\t",
             "\tpublic func ${5:name}(${6:input : Text}) : async ${7:()} {",
             "\t\t$0",
@@ -505,7 +505,7 @@
             "profiling-region"
         ],
         "body": [
-            "stable let profiling = do {",
+            "let profiling = do {",
             "\tlet r = Region.new();",
             "\tignore Region.grow(r, 32);",
             "\tr",

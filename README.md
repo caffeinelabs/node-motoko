@@ -103,7 +103,7 @@ mo.list(path)
 
 // Fetch a package from GitHub or jsDelivr
 await mo.fetchPackage(name, source);
-await mo.fetchPackage('base', 'caffeinelabs/motoko-base/master/src');
+await mo.fetchPackage('core', 'caffeinelabs/motoko-core/main/src');
 
 // Try to fetch and load packages from GitHub or jsDelivr
 await mo.installPackages({ [packageName]: repositoryPath, ... })
@@ -133,9 +133,8 @@ mo.setRunStepLimit(limit)
 // Generate errors and warnings for a Motoko program
 mo.check(path)
 
-// Run a Motoko program with optional virtual library paths
+// Run a Motoko program (split programs across files with imports)
 mo.run(path)
-mo.run(path, [libraryPath, ...])
 
 // Generate the Candid interface for a Motoko program
 mo.candid(path)

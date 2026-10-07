@@ -259,11 +259,9 @@ export default function wrapMotoko(compiler: Compiler) {
         } {
             return invoke('checkWithScopeCache', false, [path, scopeCache]);
         },
-        run(
-            path: string,
-            libPaths?: string[] | undefined,
-        ): { stdout: string; stderr: string; result: Result } {
-            const run = invoke('run', false, [libPaths || [], path]);
+        run(path: string): { stdout: string; stderr: string; result: Result } {
+            // moc 2 no longer preloads library files; use imports instead
+            const run = invoke('run', false, [[], path]);
             run.stdout = asciiToUtf8(run.stdout);
             run.stderr = asciiToUtf8(run.stderr);
             return run;
